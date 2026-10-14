@@ -1,69 +1,88 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { Bike, Building2, Landmark, UserRound } from "lucide-react";
+import Link from "next/link";
+import { MobileShell } from "@/components/shell/mobile-shell";
+import { buttonVariants } from "@/components/ui/button";
+import { dictionary } from "@/lib/i18n";
+import { useDaakStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import type { Role } from "@/types/daak";
+
+const cards: { role: Role; icon: typeof UserRound; hint: "citizenHint" | "businessHint" | "riderHint" | "governmentHint" }[] = [
+  { role: "citizen", icon: UserRound, hint: "citizenHint" },
+  { role: "business", icon: Building2, hint: "businessHint" },
+  { role: "rider", icon: Bike, hint: "riderHint" },
+  { role: "government", icon: Landmark, hint: "governmentHint" },
+];
+
+export default function HomePage() {
+  const language = useDaakStore((state) => state.language);
+  const hydrated = useDaakStore((state) => state.hydrated);
+  const profile = useDaakStore((state) => state.profile);
+  const t = dictionary[language];
+  const signedIn = hydrated && Boolean(profile?.isVerified);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <MobileShell showNav={false}>
+      <section className="bg-navy text-white">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(16rem,0.7fr)] lg:items-end lg:px-8 lg:py-20">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.18em] text-red-200 uppercase">DAAK NEPAL</p>
+            <h1 className="mt-4 max-w-2xl text-[1.7rem] leading-tight font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl lg:leading-[1.15]">
+              {t.landing.hero}
+            </h1>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap lg:flex-col">
+            {signedIn ? (
+              <Link href="/dashboard" className={cn(buttonVariants({ size: "lg" }), "sm:w-auto")}>
+                {t.landing.continueApp}
+              </Link>
+            ) : (
+              <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "sm:w-auto")}>
+                {t.landing.getStarted}
+              </Link>
+            )}
+            <Link href="/login" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "sm:w-auto")}>
+              {t.landing.login}
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
+        <section>
+          <h2 className="text-lg font-semibold text-navy">{t.landing.rolesTitle}</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {cards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Link
+                  key={card.role}
+                  href={`/register?role=${card.role}`}
+                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+                >
+                  <span className="grid size-10 place-items-center rounded-xl bg-blue-50 text-brand">
+                    <Icon className="size-5" />
+                  </span>
+                  <span className="mt-4 block text-sm font-semibold text-navy">{t.roles[card.role]}</span>
+                  <span className="mt-1 block text-sm leading-6 text-slate-500">{t.roles[card.hint]}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+        <section className="rounded-3xl border border-slate-200 bg-white p-6">
+          <h2 className="text-lg font-semibold text-navy">{t.landing.aboutTitle}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{t.landing.aboutBody}</p>
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {[t.landing.p1, t.landing.p2, t.landing.p3, t.landing.p4].map((item) => (
+              <li key={item} className="rounded-xl bg-slate-50 px-3 py-3 text-sm font-semibold text-navy">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </MobileShell>
   );
 }
